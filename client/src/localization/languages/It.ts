@@ -901,4 +901,18 @@ export default {
   com_nav_no_search_results: 'Nessun risultato trovato',
   com_nav_setting_chat: 'Chat',
   com_nav_external: 'Esterno',
+
+  com_users_filter: 'Filtra utenti...',
+  com_users_filter_email: 'Filtra utenti per email...',
+  com_ui_delete_success: 'Eliminazione riuscita',
+  com_ui_delete_error: 'Eliminazione fallita',
+  com_ui_update_success: 'Aggiornamento riuscito',
+  com_ui_update_error: 'Aggiornamento fallito',
+  com_ui_set_confirm: 'Sei sicuro di voler procedere con questa azione?',
+  com_ui_delete_select_users: 'Sei sicuro di voler eliminare gli utenti selezionati? Questa azione eliminerà tutte le conversazioni, i file, ecc., associati a questi utenti.',
+  com_auth_reset_password_error: 'Reimpostazione della password fallita. Riprova o contatta l’amministratore!',
+  com_auth_update_error: 'Operazione fallita. Riprova o contatta l’amministratore!',
+  com_nav_users_add: 'Aggiungi utente',
+  com_nav_user_add_error: 'Aggiunta dell’utente fallita. Riprova o contatta l’amministratore!',
+
 };

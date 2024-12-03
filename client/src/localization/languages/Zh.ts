@@ -28,6 +28,7 @@ export default {
   com_files_no_results: '无结果。',
   com_files_filter: '筛选文件...',
   com_files_number_selected: '已选择 {0} 个文件（共 {1} 个文件）',
+  com_users_number_selected: '已选择 {0} 个用户（共 {1} 个用户）',
   com_sidepanel_select_assistant: '选择助手',
   com_sidepanel_parameters: '参数',
   com_sidepanel_assistant_builder: '助手生成器',
@@ -51,6 +52,7 @@ export default {
   com_assistants_retrieval: '检索',
   com_assistants_search_name: '根据名称搜索助手',
   com_ui_tools: '工具',
+  com_ui_actions: '操作',
   com_assistants_actions: '操作',
   com_assistants_add_tools: '添加工具',
   com_assistants_add_actions: '添加操作',
@@ -120,6 +122,9 @@ export default {
   com_ui_name: '名称',
   com_ui_date: '日期',
   com_ui_storage: '存储',
+  com_ui_status: '状态',
+  com_ui_date_sign_up: '注册日期',
+  com_ui_date_update: '更新日期',
   com_ui_context: '上下文',
   com_ui_size: '大小',
   com_ui_host: '主机',
@@ -156,6 +161,8 @@ export default {
   com_ui_versions: '版本',
   com_ui_version_var: '版本 {0}',
   com_ui_advanced: '进阶',
+  com_ui_set_to_admin: '设为ADMIN',
+  com_ui_set_to_user: '设为USER',
   com_ui_admin_settings: '管理员设置',
   com_ui_error_save_admin_settings: '保存您的管理员设置时出现错误。',
   com_ui_prompt_preview_not_shared: '作者未允许对此提示词进行协作。',
@@ -605,6 +612,7 @@ export default {
   com_nav_tool_remove: '移除',
   com_nav_tool_dialog: '助手工具',
   com_ui_misc: '杂项',
+  com_ui_role: '角色',
   com_ui_roleplay: '角色扮演',
   com_ui_write: '写作',
   com_ui_idea: '灵感',
@@ -618,6 +626,7 @@ export default {
   com_ui_upload_image: '上传图片',
   com_ui_select_a_category: '未选择类别',
   com_ui_clear_all: '全部清除',
+  com_ui_username: '用户名',
   com_nav_tool_dialog_description: '必须保存助手才能保留工具选择。',
   com_show_agent_settings: '显示代理设置',
   com_show_completion_settings: '显示补全设置',
@@ -673,8 +682,9 @@ export default {
   com_nav_clear_conversation_confirm_message: '您确定要删除所有对话吗？该操作无法撤销。',
   com_nav_help_faq: '帮助',
   com_nav_settings: '设置',
+  com_nav_users: '用户管理',
   com_nav_search_placeholder: '搜索消息',
-  com_nav_delete_account: '删除账户',
+  com_nav_delete_account: '删除用户',
   com_nav_delete_account_confirm: '删除账户 - 您确定吗？',
   com_nav_delete_account_button: '永久删除我的账户',
   com_nav_delete_account_email_placeholder: '请输入您的账户邮箱',
@@ -850,4 +860,21 @@ export default {
 
   com_nav_chat_commands_info:
     '这些命令通过在您的消息开头输入特定字符来激活。每个命令都由其指定的前缀触发。如果您经常在消息开头使用这些字符，可以选择禁用这些命令。',
+
+
+  com_users_filter: '筛选用户...',
+  com_users_filter_email: '根据 email 筛选用户...',
+  com_ui_delete_success: '删除成功',
+  com_ui_delete_error: '删除失败',
+  com_ui_update_success: '更新成功',
+  com_ui_update_error: '更新失败',
+  com_ui_set_confirm: '你确定要进行此操作吗？',
+  com_ui_delete_select_users: '您确定要删除所选用户吗?此操作会把该用户下的所有对话、文件等都删除',
+  com_auth_reset_password_error: '重置密码失败，请重试或联系管理员！',
+  com_auth_update_error: '操作失败，请重试或联系管理员！',
+  com_nav_users_add: '新增用户',
+  com_nav_user_add_error: '新增用户失败，请重试或联系管理员!',
+
+
+
 };

@@ -18,6 +18,7 @@ export * from './types/agents';
 export * from './types/assistants';
 export * from './types/queries';
 export * from './types/files';
+export * from './types/users';
 export * from './types/mutations';
 export * from './types/runs';
 /* query/mutation keys */

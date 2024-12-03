@@ -102,6 +102,7 @@ export type TError = {
 };
 
 export type TUser = {
+  _id: string;
   id: string;
   username: string;
   email: string;

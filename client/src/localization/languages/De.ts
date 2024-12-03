@@ -889,4 +889,18 @@ export default {
   com_nav_lang_indonesia: 'Indonesia',
   com_nav_lang_hebrew: 'עברית',
   com_nav_lang_finnish: 'Suomi',
+
+  com_users_filter: 'Benutzer filtern...',
+  com_users_filter_email: 'Benutzer nach E-Mail filtern...',
+  com_ui_delete_success: 'Erfolgreich gelöscht',
+  com_ui_delete_error: 'Löschen fehlgeschlagen',
+  com_ui_update_success: 'Erfolgreich aktualisiert',
+  com_ui_update_error: 'Aktualisierung fehlgeschlagen',
+  com_ui_set_confirm: 'Sind Sie sicher, dass Sie diese Aktion durchführen möchten?',
+  com_ui_delete_select_users: 'Sind Sie sicher, dass Sie die ausgewählten Benutzer löschen möchten? Diese Aktion löscht alle Konversationen, Dateien usw., die mit diesen Benutzern verbunden sind.',
+  com_auth_reset_password_error: 'Passwort zurücksetzen fehlgeschlagen. Bitte versuchen Sie es erneut oder wenden Sie sich an den Administrator!',
+  com_auth_update_error: 'Vorgang fehlgeschlagen. Bitte versuchen Sie es erneut oder wenden Sie sich an den Administrator!',
+  com_nav_users_add: 'Benutzer hinzufügen',
+  com_nav_user_add_error: 'Benutzer konnte nicht hinzugefügt werden. Bitte versuchen Sie es erneut oder wenden Sie sich an den Administrator!',
+
 };

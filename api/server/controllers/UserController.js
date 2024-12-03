@@ -7,6 +7,7 @@ const {
   deletePresets,
   deleteMessages,
   deleteUserById,
+  findUsers, updateUser,
 } = require('~/models');
 const User = require('~/models/User');
 const { updateUserPluginAuth, deleteUserPluginAuth } = require('~/server/services/PluginService');
@@ -16,9 +17,20 @@ const { processDeleteRequest } = require('~/server/services/Files/process');
 const { deleteAllSharedLinks } = require('~/models/Share');
 const { Transaction } = require('~/models/Transaction');
 const { logger } = require('~/config');
+const bcrypt = require("bcryptjs");
+const {SystemRoles} = require("librechat-data-provider");
 
 const getUserController = async (req, res) => {
   res.status(200).send(req.user);
+};
+const getUsersController = async (req, res) => {
+  try {
+    const users = await findUsers();
+    res.status(200).send(users);
+  } catch (error) {
+    logger.error('[/users] Error getting users:', error);
+    res.status(400).json({ message: 'Error in request', error: error.message });
+  }
 };
 
 const getTermsStatusController = async (req, res) => {
@@ -106,31 +118,71 @@ const updateUserPluginsController = async (req, res) => {
   }
 };
 
-const deleteUserController = async (req, res) => {
-  const { user } = req;
-
+const updateUsersController = async (req, res) => {
+  const { userIds, action, value } = req.body;
   try {
-    await deleteMessages({ user: user.id }); // delete user messages
-    await Session.deleteMany({ user: user.id }); // delete user sessions
-    await Transaction.deleteMany({ user: user.id }); // delete user transactions
-    await deleteUserKey({ userId: user.id, all: true }); // delete user keys
-    await Balance.deleteMany({ user: user._id }); // delete user balances
-    await deletePresets(user.id); // delete user presets
-    /* TODO: Delete Assistant Threads */
-    await deleteConvos(user.id); // delete user convos
-    await deleteUserPluginAuth(user.id, null, true); // delete user plugin auth
-    await deleteUserById(user.id); // delete user
-    await deleteAllSharedLinks(user.id); // delete user shared links
-    await deleteUserFiles(req); // delete user files
-    await deleteFiles(null, user.id); // delete database files in case of orphaned files from previous steps
-    /* TODO: queue job for cleaning actions and assistants of non-existant users */
-    logger.info(`User deleted account. Email: ${user.email} ID: ${user.id}`);
+    for(i in userIds) {
+      const userId = userIds[i]
+      let updateData = {}
+      if (action === 'role') {
+        updateData = {role: value}
+      } else if (action === 'password') {
+        const salt = bcrypt.genSaltSync(10);
+        updateData = {password: bcrypt.hashSync(value, salt)}
+      }
+      await updateUser(userId, updateData);
+    }
+    logger.info(`Users [${userIds}] update to ${value} success.`);
+    res.status(200).send({ message: 'User updated' });
+  } catch (err) {
+    logger.error('[updateUsersController]', err);
+    return res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+const deleteUserController = async (req, res) => {
+  try {
+    await delUser(req)
     res.status(200).send({ message: 'User deleted' });
   } catch (err) {
     logger.error('[deleteUserController]', err);
     return res.status(500).json({ message: 'Something went wrong.' });
   }
 };
+
+const deleteUsersController = async (req, res) => {
+  const userIds = req.body;
+  // TODO GXG Batch Delete
+  for(i in userIds) {
+    req.user = {id: userIds[i]}
+    try {
+      await delUser(req)
+      res.status(200).send({ message: 'User deleted' });
+    } catch (err) {
+      logger.error('[deleteUserController]', err);
+      return res.status(500).json({ message: 'Something went wrong.' });
+    }
+  }
+};
+
+const delUser = async (req) => {
+  const { user } = req;
+  await deleteMessages({ user: user.id }); // delete user messages
+  await Session.deleteMany({ user: user.id }); // delete user sessions
+  await Transaction.deleteMany({ user: user.id }); // delete user transactions
+  await deleteUserKey({ userId: user.id, all: true }); // delete user keys
+  await Balance.deleteMany({ user: user.id }); // delete user balances
+  await deletePresets(user.id); // delete user presets
+  /* TODO: Delete Assistant Threads */
+  await deleteConvos(user.id); // delete user convos
+  await deleteUserPluginAuth(user.id, null, true); // delete user plugin auth
+  await deleteUserById(user.id); // delete user
+  await deleteAllSharedLinks(user.id); // delete user shared links
+  await deleteUserFiles(req); // delete user files
+  await deleteFiles(null, user.id); // delete database files in case of orphaned files from previous steps
+  /* TODO: queue job for cleaning actions and assistants of non-existant users */
+  logger.info(`User deleted account. Email: ${user.email} ID: ${user.id}`);
+}
 
 const verifyEmailController = async (req, res) => {
   try {
@@ -162,10 +214,13 @@ const resendVerificationController = async (req, res) => {
 
 module.exports = {
   getUserController,
+  getUsersController,
   getTermsStatusController,
   acceptTermsController,
   deleteUserController,
+  deleteUsersController,
   verifyEmailController,
   updateUserPluginsController,
   resendVerificationController,
+  updateUsersController,
 };

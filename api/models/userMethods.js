@@ -3,6 +3,7 @@ const signPayload = require('~/server/services/signPayload');
 const { isEnabled } = require('~/server/utils/handleText');
 const Balance = require('./Balance');
 const User = require('./User');
+const {Key} = require("~/models/index");
 
 /**
  * Retrieve a user by ID and convert the found user document to a plain object.
@@ -34,6 +35,25 @@ const findUser = async function (searchCriteria, fieldsToSelect = null) {
   }
 
   return await query.lean();
+};
+
+/**
+ * Search for users based on partial data and return matching user document as plain object.
+ * @param {Partial<MongoUser>} searchCriteria - The partial data to use for searching the user.
+ * @param {string|string[]} [fieldsToSelect] - The fields to include or exclude in the returned document.
+ * @returns {Promise<MongoUser>} A plain object representing the user document, or `null` if no user is found.
+ */
+// const findUsers = async function (searchCriteria, fieldsToSelect = null) {
+//   const query = User.find(searchCriteria);
+//   if (fieldsToSelect) {
+//     query.select(fieldsToSelect);
+//   }
+//
+//   return await query.lean();
+// };
+const findUsers = async (filter, _sortOptions) => {
+  const sortOptions = { updatedAt: -1, ..._sortOptions };
+  return await User.find(filter).sort(sortOptions).lean();
 };
 
 /**
@@ -174,4 +194,5 @@ module.exports = {
   createUser,
   updateUser,
   findUser,
+  findUsers,
 };

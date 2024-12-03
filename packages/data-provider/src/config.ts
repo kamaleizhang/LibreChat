@@ -1116,6 +1116,10 @@ export enum LocalStorageKeys {
   LAST_TOOLS = 'lastSelectedTools',
   /** Key for the last selected spec by name*/
   LAST_SPEC = 'lastSelectedSpec',
+  /** Key for temporary users to delete */
+  USERS_TO_DELETE = 'usersToDelete',
+  /** Key for temporary users to update */
+  USERS_TO_UPDATE = 'usersToUpdate',
   /** Key for temporary files to delete */
   FILES_TO_DELETE = 'filesToDelete',
   /** Prefix key for the last selected assistant ID by index */

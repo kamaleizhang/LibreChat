@@ -10,7 +10,9 @@ import useAvatar from '~/hooks/Messages/useAvatar';
 import { UserIcon } from '~/components/svg';
 import { useLocalize } from '~/hooks';
 import Settings from './Settings';
+import Users from '~/components/Users/Users';
 import store from '~/store';
+import { SystemRoles } from 'librechat-data-provider';
 
 function AccountSettings() {
   const localize = useLocalize();
@@ -21,9 +23,11 @@ function AccountSettings() {
   });
   const [showSettings, setShowSettings] = useState(false);
   const [showFiles, setShowFiles] = useRecoilState(store.showFiles);
+  const [showUsers, setShowUsers] = useRecoilState(store.showUsers);
 
   const avatarSrc = useAvatar(user);
   const name = user?.avatar ?? user?.username ?? '';
+  const user_role = user?.role ?? '';
 
   return (
     <Select.SelectProvider>
@@ -111,6 +115,15 @@ function AccountSettings() {
           <GearIcon className="icon-md" aria-hidden="true" />
           {localize('com_nav_settings')}
         </Select.SelectItem>
+
+        <Select.SelectItem
+          value=""
+          onClick={() => setShowUsers(true)}
+          className="select-item text-sm"
+        >
+          <UserIcon className="icon-md" aria-hidden="true" />
+          {localize('com_nav_users')}
+        </Select.SelectItem>
         <DropdownMenuSeparator />
         <Select.SelectItem
           aria-selected={true}
@@ -123,6 +136,7 @@ function AccountSettings() {
         </Select.SelectItem>
       </Select.SelectPopover>
       {showFiles && <FilesView open={showFiles} onOpenChange={setShowFiles} />}
+      {showUsers && <Users open={showUsers} onOpenChange={setShowUsers} />}
       {showSettings && <Settings open={showSettings} onOpenChange={setShowSettings} />}
     </Select.SelectProvider>
   );

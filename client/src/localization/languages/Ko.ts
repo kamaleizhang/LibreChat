@@ -1095,4 +1095,19 @@ export default {
   com_nav_no_search_results: '검색 결과가 없습니다',
 
   com_nav_chat_commands: '채팅 명령어',
+
+
+  com_users_filter: '사용자 필터링...',
+  com_users_filter_email: '이메일로 사용자 필터링...',
+  com_ui_delete_success: '삭제 성공',
+  com_ui_delete_error: '삭제 실패',
+  com_ui_update_success: '업데이트 성공',
+  com_ui_update_error: '업데이트 실패',
+  com_ui_set_confirm: '이 작업을 수행하시겠습니까?',
+  com_ui_delete_select_users: '선택한 사용자를 삭제하시겠습니까? 이 작업은 해당 사용자의 모든 대화, 파일 등을 삭제합니다.',
+  com_auth_reset_password_error: '비밀번호 재설정 실패. 다시 시도하거나 관리자에게 문의하세요!',
+  com_auth_update_error: '작업 실패. 다시 시도하거나 관리자에게 문의하세요!',
+  com_nav_users_add: '사용자 추가',
+  com_nav_user_add_error: '사용자 추가 실패. 다시 시도하거나 관리자에게 문의하세요!',
+
 };

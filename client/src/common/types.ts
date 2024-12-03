@@ -479,6 +479,14 @@ export interface ExtendedFile {
   embedded?: boolean;
 }
 
+export interface ExtendedUser {
+  user_id: string;
+  username?: string;
+  role?: string;
+  email?: string;
+  name?: string;
+}
+
 export type ContextType = { navVisible: boolean; setNavVisible: (visible: boolean) => void };
 
 export interface SwitcherProps {

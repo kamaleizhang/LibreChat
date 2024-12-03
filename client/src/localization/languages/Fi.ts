@@ -709,4 +709,18 @@ export default {
   com_nav_lang_indonesia: 'Indonesia',
   com_nav_lang_hebrew: 'עברית',
   com_nav_lang_finnish: 'Suomi',
+
+  com_users_filter: 'Suodata käyttäjiä...',
+  com_users_filter_email: 'Suodata käyttäjiä sähköpostin mukaan...',
+  com_ui_delete_success: 'Poisto onnistui',
+  com_ui_delete_error: 'Poisto epäonnistui',
+  com_ui_update_success: 'Päivitys onnistui',
+  com_ui_update_error: 'Päivitys epäonnistui',
+  com_ui_set_confirm: 'Oletko varma, että haluat suorittaa tämän toiminnon?',
+  com_ui_delete_select_users: 'Oletko varma, että haluat poistaa valitut käyttäjät? Tämä toiminto poistaa kaikki näihin käyttäjiin liittyvät keskustelut, tiedostot jne.',
+  com_auth_reset_password_error: 'Salasanan nollaaminen epäonnistui. Yritä uudelleen tai ota yhteyttä ylläpitäjään!',
+  com_auth_update_error: 'Toiminto epäonnistui. Yritä uudelleen tai ota yhteyttä ylläpitäjään!',
+  com_nav_users_add: 'Lisää käyttäjä',
+  com_nav_user_add_error: 'Käyttäjän lisääminen epäonnistui. Yritä uudelleen tai ota yhteyttä ylläpitäjään!',
+
 };

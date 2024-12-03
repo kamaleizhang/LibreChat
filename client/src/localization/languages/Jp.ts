@@ -856,4 +856,18 @@ export default {
   com_nav_no_search_results: '検索結果が見つかりません',
   com_nav_chat_commands_info:
     'メッセージの先頭に特定の文字を入力することで、これらのコマンドが有効になります。各コマンドは、決められた文字（プレフィックス）で起動します。メッセージの先頭にこれらの文字をよく使用する場合は、コマンド機能を無効にすることができます。',
+
+  com_users_filter: 'ユーザーをフィルター...',
+  com_users_filter_email: 'メールでユーザーをフィルター...',
+  com_ui_delete_success: '削除が成功しました',
+  com_ui_delete_error: '削除に失敗しました',
+  com_ui_update_success: '更新が成功しました',
+  com_ui_update_error: '更新に失敗しました',
+  com_ui_set_confirm: 'この操作を実行してよろしいですか？',
+  com_ui_delete_select_users: '選択したユーザーを削除してもよろしいですか？ この操作により、これらのユーザーに関連するすべての会話、ファイルなどが削除されます。',
+  com_auth_reset_password_error: 'パスワードのリセットに失敗しました。再試行するか、管理者に連絡してください！',
+  com_auth_update_error: '操作に失敗しました。再試行するか、管理者に連絡してください！',
+  com_nav_users_add: 'ユーザーを追加',
+  com_nav_user_add_error: 'ユーザーの追加に失敗しました。再試行するか、管理者に連絡してください！',
+
 };

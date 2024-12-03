@@ -398,4 +398,18 @@ export default {
   com_nav_lang_indonesia: 'Indonesia',
   com_nav_lang_hebrew: 'עברית',
   com_nav_lang_finnish: 'Suomi',
+
+  com_users_filter: 'Filter pengguna...',
+  com_users_filter_email: 'Filter pengguna berdasarkan email...',
+  com_ui_delete_success: 'Penghapusan berhasil',
+  com_ui_delete_error: 'Penghapusan gagal',
+  com_ui_update_success: 'Pembaruan berhasil',
+  com_ui_update_error: 'Pembaruan gagal',
+  com_ui_set_confirm: 'Apakah Anda yakin ingin melakukan tindakan ini?',
+  com_ui_delete_select_users: 'Apakah Anda yakin ingin menghapus pengguna yang dipilih? Tindakan ini akan menghapus semua percakapan, file, dll., yang terkait dengan pengguna ini.',
+  com_auth_reset_password_error: 'Gagal mereset kata sandi. Silakan coba lagi atau hubungi administrator!',
+  com_auth_update_error: 'Operasi gagal. Silakan coba lagi atau hubungi administrator!',
+  com_nav_users_add: 'Tambah pengguna',
+  com_nav_user_add_error: 'Gagal menambahkan pengguna. Silakan coba lagi atau hubungi administrator!',
+
 };

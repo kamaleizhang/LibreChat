@@ -827,4 +827,18 @@ export default {
   com_nav_setting_chat: '聊天',
   com_nav_setting_speech: '語音',
   com_nav_command_settings: '指令設定',
+
+  com_users_filter: '篩選用戶...',
+  com_users_filter_email: '根據 email 篩選用戶...',
+  com_ui_delete_success: '刪除成功',
+  com_ui_delete_error: '刪除失敗',
+  com_ui_update_success: '更新成功',
+  com_ui_update_error: '更新失敗',
+  com_ui_set_confirm: '你確定要進行此操作嗎？',
+  com_ui_delete_select_users: '您確定要刪除所選用戶嗎？此操作會刪除該用戶下的所有對話、文件等。',
+  com_auth_reset_password_error: '重置密碼失敗，請重試或聯絡管理員！',
+  com_auth_update_error: '操作失敗，請重試或聯絡管理員！',
+  com_nav_users_add: '新增用戶',
+  com_nav_user_add_error: '新增用戶失敗，請重試或聯絡管理員！',
+
 };

@@ -692,32 +692,6 @@ export const useUploadAvatarMutation = (
   });
 };
 
-export const useDeleteUserMutation = (
-  options?: t.MutationOptions<unknown, undefined>,
-): UseMutationResult<unknown, unknown, undefined, unknown> => {
-  const queryClient = useQueryClient();
-  const setDefaultPreset = useSetRecoilState(store.defaultPreset);
-  return useMutation([MutationKeys.deleteUser], {
-    mutationFn: () => dataService.deleteUser(),
-
-    ...(options || {}),
-    onSuccess: (...args) => {
-      options?.onSuccess?.(...args);
-    },
-    onMutate: (...args) => {
-      setDefaultPreset(null);
-      queryClient.removeQueries();
-      localStorage.removeItem(LocalStorageKeys.LAST_CONVO_SETUP);
-      localStorage.removeItem(`${LocalStorageKeys.LAST_CONVO_SETUP}_0`);
-      localStorage.removeItem(`${LocalStorageKeys.LAST_CONVO_SETUP}_1`);
-      localStorage.removeItem(LocalStorageKeys.LAST_MODEL);
-      localStorage.removeItem(LocalStorageKeys.LAST_TOOLS);
-      localStorage.removeItem(LocalStorageKeys.FILES_TO_DELETE);
-      options?.onMutate?.(...args);
-    },
-  });
-};
-
 /* Speech to text */
 export const useSpeechToTextMutation = (
   options?: t.SpeechToTextOptions,

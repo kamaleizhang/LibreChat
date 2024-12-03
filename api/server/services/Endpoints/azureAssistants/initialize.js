@@ -108,8 +108,10 @@ const initializeClient = async ({ req, res, version, endpointOption, initAppClie
 
     azureOptions = currentOptions;
 
+    // TODO GXG 写死此处。避免出现Azuer OpenAI和Assistant冲突的情况
+    // baseURL: azureBaseURL ?? 'https://${INSTANCE_NAME}.openai.azure.com/openai',
     baseURL = constructAzureURL({
-      baseURL: azureBaseURL ?? 'https://${INSTANCE_NAME}.openai.azure.com/openai',
+      baseURL: 'https://${INSTANCE_NAME}.openai.azure.com/openai',
       azureOptions,
     });
 

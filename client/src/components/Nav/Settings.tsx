@@ -4,7 +4,7 @@ import { MessageSquare, Command } from 'lucide-react';
 import { SettingsTabValues } from 'librechat-data-provider';
 import type { TDialogProps } from '~/common';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { GearIcon, DataIcon, SpeechIcon, UserIcon, ExperimentIcon } from '~/components/svg';
+import {GearIcon, DataIcon, SpeechIcon, UserIcon, ExperimentIcon, LockIcon} from '~/components/svg';
 import { General, Chat, Speech, Beta, Commands, Data, Account } from './SettingsTabs';
 import { useMediaQuery, useLocalize } from '~/hooks';
 import { cn } from '~/utils';

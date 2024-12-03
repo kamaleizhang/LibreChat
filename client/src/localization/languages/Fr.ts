@@ -907,4 +907,18 @@ export default {
     'Personnaliser les commandes disponibles dans la conversation',
   com_nav_no_search_results: 'Aucun résultat de recherche trouvé',
   com_nav_setting_chat: 'Chat',
+
+  com_users_filter: 'Filtrer les utilisateurs...',
+  com_users_filter_email: 'Filtrer les utilisateurs par e-mail...',
+  com_ui_delete_success: 'Suppression réussie',
+  com_ui_delete_error: 'Échec de la suppression',
+  com_ui_update_success: 'Mise à jour réussie',
+  com_ui_update_error: 'Échec de la mise à jour',
+  com_ui_set_confirm: 'Êtes-vous sûr de vouloir effectuer cette action ?',
+  com_ui_delete_select_users: 'Êtes-vous sûr de vouloir supprimer les utilisateurs sélectionnés ? Cette action supprimera toutes les conversations, fichiers, etc., associés à ces utilisateurs.',
+  com_auth_reset_password_error: 'Échec de la réinitialisation du mot de passe. Veuillez réessayer ou contacter l’administrateur !',
+  com_auth_update_error: 'Échec de l’opération. Veuillez réessayer ou contacter l’administrateur !',
+  com_nav_users_add: 'Ajouter un utilisateur',
+  com_nav_user_add_error: 'Échec de l’ajout de l’utilisateur. Veuillez réessayer ou contacter l’administrateur !',
+
 };

@@ -859,4 +859,18 @@ export default {
   com_nav_setting_chat: 'دردشة',
   com_nav_no_search_results: 'لم يتم العثور على نتائج البحث',
   com_nav_setting_speech: 'الكلام',
+
+  com_users_filter: 'تصفية المستخدمين...',
+  com_users_filter_email: 'تصفية المستخدمين حسب البريد الإلكتروني...',
+  com_ui_delete_success: 'تم الحذف بنجاح',
+  com_ui_delete_error: 'فشل الحذف',
+  com_ui_update_success: 'تم التحديث بنجاح',
+  com_ui_update_error: 'فشل التحديث',
+  com_ui_set_confirm: 'هل أنت متأكد أنك تريد تنفيذ هذا الإجراء؟',
+  com_ui_delete_select_users: 'هل أنت متأكد أنك تريد حذف المستخدمين المحددين؟ سيؤدي هذا الإجراء إلى حذف جميع المحادثات والملفات المرتبطة بهؤلاء المستخدمين.',
+  com_auth_reset_password_error: 'فشل إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى أو الاتصال بالمسؤول!',
+  com_auth_update_error: 'فشلت العملية. يرجى المحاولة مرة أخرى أو الاتصال بالمسؤول!',
+  com_nav_users_add: 'إضافة مستخدم',
+  com_nav_user_add_error: 'فشل إضافة المستخدم. يرجى المحاولة مرة أخرى أو الاتصال بالمسؤول!',
+
 };

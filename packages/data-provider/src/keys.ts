@@ -8,6 +8,7 @@ export enum QueryKeys {
   conversation = 'conversation',
   searchEnabled = 'searchEnabled',
   user = 'user',
+  users = 'users',
   name = 'name', // user key name
   models = 'models',
   balance = 'balance',
@@ -50,6 +51,10 @@ export enum QueryKeys {
 export enum MutationKeys {
   fileUpload = 'fileUpload',
   fileDelete = 'fileDelete',
+  userUpload = 'userUpload',
+  usersUpload = 'usersUpload',
+  userDelete = 'userDelete',
+  usersDelete = 'usersDelete',
   updatePreset = 'updatePreset',
   deletePreset = 'deletePreset',
   logoutUser = 'logoutUser',
@@ -63,5 +68,7 @@ export enum MutationKeys {
   deleteAction = 'deleteAction',
   deleteAgentAction = 'deleteAgentAction',
   deleteUser = 'deleteUser',
+  deleteUsers = 'usersDelete',
+  addUsers = 'usersAdd',
   updateRole = 'updateRole',
 }

@@ -5,10 +5,12 @@ import * as a from './types/assistants';
 import * as m from './types/mutations';
 import * as q from './types/queries';
 import * as f from './types/files';
+import * as u from './types/users';
 import * as config from './config';
 import request from './request';
 import * as s from './schemas';
 import * as r from './roles';
+import axios from 'axios';
 
 export function abortRequestWithMessage(
   endpoint: string,
@@ -29,6 +31,18 @@ export function revokeAllUserKeys(): Promise<unknown> {
 export function deleteUser(): Promise<s.TPreset> {
   return request.delete(endpoints.deleteUser());
 }
+
+export const deleteUsers = async (payload: {
+  userIds: string[];
+}): Promise<u.DeleteUsersResponse> =>
+  request.post(endpoints.deleteUsers(), payload);
+
+export const updateUsers = async (payload: {
+  userIds: string[];
+  action: string;
+  value: string;
+}): Promise<u.DeleteUsersResponse> =>
+  request.post(endpoints.updateUsers(), payload);
 
 export function getMessagesByConvoId(conversationId: string): Promise<s.TMessage[]> {
   if (conversationId === 'new') {
@@ -115,6 +129,13 @@ export function getSearchEnabled(): Promise<boolean> {
 export function getUser(): Promise<t.TUser> {
   return request.get(endpoints.user());
 }
+
+// export function getUsers(): Promise<t.TUser[]> {
+//   return request.get(endpoints.user());
+// }
+export const getUsers = (): Promise<t.TUser[]> => {
+  return request.get(endpoints.users());
+};
 
 export function getUserBalance(): Promise<string> {
   return request.get(endpoints.balance());

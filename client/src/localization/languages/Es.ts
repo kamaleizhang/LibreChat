@@ -1145,4 +1145,17 @@ export default {
   com_nav_setting_chat: 'Configuración del chat',
 
   com_nav_setting_speech: 'Voz y habla',
+  com_users_filter: 'Filtrar usuarios...',
+  com_users_filter_email: 'Filtrar usuarios por correo electrónico...',
+  com_ui_delete_success: 'Eliminación exitosa',
+  com_ui_delete_error: 'Error al eliminar',
+  com_ui_update_success: 'Actualización exitosa',
+  com_ui_update_error: 'Error al actualizar',
+  com_ui_set_confirm: '¿Estás seguro de que deseas realizar esta acción?',
+  com_ui_delete_select_users: '¿Estás seguro de que deseas eliminar los usuarios seleccionados? Esta acción eliminará todas las conversaciones, archivos, etc., asociados con estos usuarios.',
+  com_auth_reset_password_error: 'Error al restablecer la contraseña. Inténtalo de nuevo o contacta al administrador.',
+  com_auth_update_error: 'La operación falló. Inténtalo de nuevo o contacta al administrador.',
+  com_nav_users_add: 'Añadir usuario',
+  com_nav_user_add_error: 'Error al añadir usuario. Inténtalo de nuevo o contacta al administrador.',
+
 };

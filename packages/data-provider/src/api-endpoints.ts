@@ -2,12 +2,15 @@ import type { AssistantsEndpoint } from './schemas';
 
 export const health = () => '/health';
 export const user = () => '/api/user';
+export const users = () => '/api/user/users';
 
 export const balance = () => '/api/balance';
 
 export const userPlugins = () => '/api/user/plugins';
 
 export const deleteUser = () => '/api/user/delete';
+export const deleteUsers = () => '/api/user/deleteUsers';
+export const updateUsers = () => '/api/user/updateUsers';
 
 export const messages = (conversationId: string, messageId?: string) =>
   `/api/messages/${conversationId}${messageId ? `/${messageId}` : ''}`;

@@ -814,4 +814,18 @@ export default {
   com_ui_decline: 'Eu não aceito',
   com_ui_terms_and_conditions: 'Termos e Condições',
   com_ui_no_terms_content: 'Nenhum conteúdo de termos e condições para exibir',
+
+  com_users_filter: 'Filtrar usuários...',
+  com_users_filter_email: 'Filtrar usuários por email...',
+  com_ui_delete_success: 'Exclusão bem-sucedida',
+  com_ui_delete_error: 'Falha na exclusão',
+  com_ui_update_success: 'Atualização bem-sucedida',
+  com_ui_update_error: 'Falha na atualização',
+  com_ui_set_confirm: 'Você tem certeza de que deseja realizar esta ação?',
+  com_ui_delete_select_users: 'Você tem certeza de que deseja excluir os usuários selecionados? Esta ação excluirá todas as conversas, arquivos, etc., associados a esses usuários.',
+  com_auth_reset_password_error: 'Falha ao redefinir a senha. Por favor, tente novamente ou entre em contato com o administrador!',
+  com_auth_update_error: 'Operação falhou. Por favor, tente novamente ou entre em contato com o administrador!',
+  com_nav_users_add: 'Adicionar usuário',
+  com_nav_user_add_error: 'Falha ao adicionar usuário. Por favor, tente novamente ou entre em contato com o administrador!',
+
 };

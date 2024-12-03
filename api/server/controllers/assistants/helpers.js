@@ -253,6 +253,10 @@ const fetchAssistants = async ({ req, res, overrideEndpoint }) => {
  */
 function filterAssistants({ assistants, userId, assistantsConfig }) {
   const { supportedIds, excludedIds, privateAssistants } = assistantsConfig;
+  if (userId) {
+    assistants = assistants.filter(assistant => assistant.metadata && assistant.metadata.author && userId === assistant.metadata.author);
+  }
+
   if (privateAssistants) {
     return assistants.filter((assistant) => userId === assistant.metadata?.author);
   } else if (supportedIds?.length) {
