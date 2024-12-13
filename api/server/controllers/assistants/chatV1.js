@@ -334,7 +334,11 @@ const chatV1 = async (req, res) => {
 
       file_ids = files.map(({ file_id }) => file_id);
       if (file_ids.length || thread_file_ids.length) {
-        userMessage.file_ids = file_ids;
+        //todo set tools by assistants settings
+        userMessage.attachments = file_ids.map((file_id) => ({
+          file_id,
+          tools:[{"type":"file_search"}]
+        }));
         attachedFileIds = new Set([...file_ids, ...thread_file_ids]);
       }
     };
