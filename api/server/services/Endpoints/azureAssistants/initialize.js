@@ -109,7 +109,7 @@ const initializeClient = async ({ req, res, version, endpointOption, initAppClie
     azureOptions = currentOptions;
 
     baseURL = constructAzureURL({
-      baseURL: azureBaseURL ?? 'https://${INSTANCE_NAME}.openai.azure.com/openai',
+      baseURL: 'https://${INSTANCE_NAME}.openai.azure.com/openai',
       azureOptions,
     });
 
