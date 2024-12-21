@@ -222,13 +222,32 @@ const addResourceFileId = async ({req, openai, assistant_id, tool_resource, file
 const deleteResourceFileId = async ({req, openai, assistant_id, tool_resource, file_id}) => {
     const assistant = await openai.beta.assistants.retrieve(assistant_id);
     const {tool_resources = {}} = assistant;
-
+    let metadata = assistant.metadata;
     if (tool_resource && tool_resources[tool_resource]) {
-        const resource = tool_resources[tool_resource];
-        const index = resource.file_ids.indexOf(file_id);
-        if (index !== -1) {
-            resource.file_ids.splice(index, 1);
+        if (tool_resource === 'file_search') {
+            const vectorStoreId = tool_resources['file_search']['vector_store_ids'][0]
+            const myVectorStoreFile = await openai.beta.vectorStores.files.del(vectorStoreId, file_id).catch(error => {
+                logger.error('error deleting file from vector store', error);
+                throw error
+            });
+            logger.debug('deleted file from vector store', myVectorStoreFile);
+            //delete file_id from assistants metadata 用于回显
+            let fileStr = metadata.files || ""
+            let files = fileStr.split(",")
+            const index = files.indexOf(file_id)
+            if (index > -1) {
+                files.splice(index, 1)
+                fileStr = files.join(",")
+                metadata.files = fileStr
+            }
+        } else {
+            const resource = tool_resources[tool_resource];
+            const index = resource.file_ids.indexOf(file_id);
+            if (index !== -1) {
+                resource.file_ids.splice(index, 1);
+            }
         }
+
     } else {
         for (const resourceKey in tool_resources) {
             const resource = tool_resources[resourceKey];
@@ -245,7 +264,7 @@ const deleteResourceFileId = async ({req, openai, assistant_id, tool_resource, f
         req,
         openai,
         assistant_id,
-        updateData: {tools: assistant.tools, tool_resources},
+        updateData: {tools: assistant.tools, tool_resources, metadata},
     });
 };
 

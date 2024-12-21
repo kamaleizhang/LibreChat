@@ -86,26 +86,14 @@ export default function Knowledge({
         <div className="text-token-text-tertiary rounded-lg">
           {assistant_id ? localize('com_assistants_knowledge_info') : ''}
         </div>
-        {/* Files available to both tools */}
+        {/* Files available to file_search */}
         <FileRow
           files={files}
           setFiles={setFiles}
           setFilesLoading={setFilesLoading}
           assistant_id={assistant_id}
-          fileFilter={(file: ExtendedFile) =>
-            retrievalMimeTypes.some((regex) => regex.test(file.type ?? ''))
-          }
+          tool_resource={tool_resource}
           Wrapper={({ children }) => <div className="flex flex-wrap gap-2">{children}</div>}
-        />
-        <FileRow
-          files={files}
-          setFiles={setFiles}
-          setFilesLoading={setFilesLoading}
-          assistant_id={assistant_id}
-          fileFilter={(file: ExtendedFile) =>
-            !retrievalMimeTypes.some((regex) => regex.test(file.type ?? ''))
-          }
-          Wrapper={CodeInterpreterFiles}
         />
         <div>
           <button

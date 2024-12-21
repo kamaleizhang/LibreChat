@@ -67,9 +67,9 @@ export default function CodeFiles({
         <FileRow
           files={files}
           setFiles={setFiles}
+          setFilesLoading={setFilesLoading}
           assistant_id={assistant_id}
           tool_resource={tool_resource}
-          setFilesLoading={setFilesLoading}
           Wrapper={({ children }) => <div className="flex flex-wrap gap-2">{children}</div>}
         />
         <div>
