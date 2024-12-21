@@ -1,13 +1,13 @@
 const fs = require('fs').promises;
-const { FileContext } = require('librechat-data-provider');
-const { uploadImageBuffer, filterFile } = require('~/server/services/Files/process');
+const {FileContext} = require('librechat-data-provider');
+const {uploadImageBuffer, filterFile} = require('~/server/services/Files/process');
 const validateAuthor = require('~/server/middleware/assistants/validateAuthor');
-const { getStrategyFunctions } = require('~/server/services/Files/strategies');
-const { deleteAssistantActions } = require('~/server/services/ActionService');
-const { updateAssistantDoc, getAssistants } = require('~/models/Assistant');
-const { getOpenAIClient, fetchAssistants } = require('./helpers');
-const { deleteFileByFilter } = require('~/models/File');
-const { logger } = require('~/config');
+const {getStrategyFunctions} = require('~/server/services/Files/strategies');
+const {deleteAssistantActions} = require('~/server/services/ActionService');
+const {updateAssistantDoc, getAssistants} = require('~/models/Assistant');
+const {getOpenAIClient, fetchAssistants} = require('./helpers');
+const {deleteFileByFilter} = require('~/models/File');
+const {logger} = require('~/config');
 
 /**
  * Create an assistant.
@@ -16,70 +16,95 @@ const { logger } = require('~/config');
  * @returns {Assistant} 201 - success response - application/json
  */
 const createAssistant = async (req, res) => {
-  try {
-    const { openai } = await getOpenAIClient({ req, res });
+    try {
+        const {openai} = await getOpenAIClient({req, res});
 
-    const {
-      tools = [],
-      endpoint,
-      conversation_starters,
-      append_current_datetime,
-      ...assistantData
-    } = req.body;
-    delete assistantData.conversation_starters;
-    delete assistantData.append_current_datetime;
+        const {
+            tools = [],
+            endpoint,
+            conversation_starters,
+            append_current_datetime,
+            ...assistantData
+        } = req.body;
+        delete assistantData.conversation_starters;
+        delete assistantData.append_current_datetime;
 
-    assistantData.tools = tools
-      .map((tool) => {
-        if (typeof tool !== 'string') {
-          return tool;
+        assistantData.tools = tools
+            .map((tool) => {
+                if (typeof tool !== 'string') {
+                    return tool;
+                }
+
+                return req.app.locals.availableTools[tool];
+            })
+            .filter((tool) => tool);
+
+        let azureModelIdentifier = null;
+        if (openai.locals?.azureOptions) {
+            azureModelIdentifier = assistantData.model;
+            assistantData.model = openai.locals.azureOptions.azureOpenAIApiDeploymentName;
         }
 
-        return req.app.locals.availableTools[tool];
-      })
-      .filter((tool) => tool);
+        assistantData.metadata = {
+            author: req.user.id,
+            endpoint,
+        };
 
-    let azureModelIdentifier = null;
-    if (openai.locals?.azureOptions) {
-      azureModelIdentifier = assistantData.model;
-      assistantData.model = openai.locals.azureOptions.azureOpenAIApiDeploymentName;
+
+        let assistant = await openai.beta.assistants.create(assistantData).catch(error=>{
+            logger.error('[/assistants] Error creating assistant', error);
+            res.status(500).json({error: error.message});
+            throw error; // Re-throw the error after logging and responding
+        });
+
+        // Add vector store if file_search tool is present
+        if (tools.find(item => item.type === 'file_search')) {
+            const storeName = "vstore_" + assistant.id;
+            let vectorStore = await openai.beta.vectorStores.create({
+                name: storeName,
+            }).catch((error) => {
+                logger.error('[/assistants] Error creating vector store', error);
+                res.status(500).json({error: error.message});
+                throw error; // Re-throw the error after logging and responding
+            });
+            assistant = await openai.beta.assistants.update(
+                assistant_id = assistant.id,
+                {tool_resources: {file_search: {vector_store_ids: [vectorStore.id]}}}
+            ).catch(err => {
+                logger.error('[/assistants] Error updating assistant with vector store', err);
+                res.status(500).json({error: err.message});
+                throw err; // Re-throw the error after logging and responding
+            })
+        }
+
+        const createData = {user: req.user.id};
+        if (conversation_starters) {
+            createData.conversation_starters = conversation_starters;
+        }
+        if (append_current_datetime !== undefined) {
+            createData.append_current_datetime = append_current_datetime;
+        }
+
+        const document = await updateAssistantDoc({assistant_id: assistant.id}, createData);
+
+        if (azureModelIdentifier) {
+            assistant.model = azureModelIdentifier;
+        }
+
+        if (document.conversation_starters) {
+            assistant.conversation_starters = document.conversation_starters;
+        }
+
+        if (append_current_datetime !== undefined) {
+            assistant.append_current_datetime = append_current_datetime;
+        }
+
+        logger.debug('/assistants/', assistant);
+        res.status(201).json(assistant);
+    } catch (error) {
+        logger.error('[/assistants] Error creating assistant', error);
+        res.status(500).json({error: error.message});
     }
-
-    assistantData.metadata = {
-      author: req.user.id,
-      endpoint,
-    };
-
-    const assistant = await openai.beta.assistants.create(assistantData);
-
-    const createData = { user: req.user.id };
-    if (conversation_starters) {
-      createData.conversation_starters = conversation_starters;
-    }
-    if (append_current_datetime !== undefined) {
-      createData.append_current_datetime = append_current_datetime;
-    }
-
-    const document = await updateAssistantDoc({ assistant_id: assistant.id }, createData);
-
-    if (azureModelIdentifier) {
-      assistant.model = azureModelIdentifier;
-    }
-
-    if (document.conversation_starters) {
-      assistant.conversation_starters = document.conversation_starters;
-    }
-
-    if (append_current_datetime !== undefined) {
-      assistant.append_current_datetime = append_current_datetime;
-    }
-
-    logger.debug('/assistants/', assistant);
-    res.status(201).json(assistant);
-  } catch (error) {
-    logger.error('[/assistants] Error creating assistant', error);
-    res.status(500).json({ error: error.message });
-  }
 };
 
 /**
@@ -89,16 +114,16 @@ const createAssistant = async (req, res) => {
  * @returns {Assistant} 200 - success response - application/json
  */
 const retrieveAssistant = async (req, res) => {
-  try {
-    /* NOTE: not actually being used right now */
-    const { openai } = await getOpenAIClient({ req, res });
-    const assistant_id = req.params.id;
-    const assistant = await openai.beta.assistants.retrieve(assistant_id);
-    res.json(assistant);
-  } catch (error) {
-    logger.error('[/assistants/:id] Error retrieving assistant', error);
-    res.status(500).json({ error: error.message });
-  }
+    try {
+        /* NOTE: not actually being used right now */
+        const {openai} = await getOpenAIClient({req, res});
+        const assistant_id = req.params.id;
+        const assistant = await openai.beta.assistants.retrieve(assistant_id);
+        res.json(assistant);
+    } catch (error) {
+        logger.error('[/assistants/:id] Error retrieving assistant', error);
+        res.status(500).json({error: error.message});
+    }
 };
 
 /**
@@ -111,51 +136,51 @@ const retrieveAssistant = async (req, res) => {
  * @returns {Assistant} 200 - success response - application/json
  */
 const patchAssistant = async (req, res) => {
-  try {
-    const { openai } = await getOpenAIClient({ req, res });
-    await validateAuthor({ req, openai });
+    try {
+        const {openai} = await getOpenAIClient({req, res});
+        await validateAuthor({req, openai});
 
-    const assistant_id = req.params.id;
-    const {
-      endpoint: _e,
-      conversation_starters,
-      append_current_datetime,
-      ...updateData
-    } = req.body;
-    updateData.tools = (updateData.tools ?? [])
-      .map((tool) => {
-        if (typeof tool !== 'string') {
-          return tool;
+        const assistant_id = req.params.id;
+        const {
+            endpoint: _e,
+            conversation_starters,
+            append_current_datetime,
+            ...updateData
+        } = req.body;
+        updateData.tools = (updateData.tools ?? [])
+            .map((tool) => {
+                if (typeof tool !== 'string') {
+                    return tool;
+                }
+
+                return req.app.locals.availableTools[tool];
+            })
+            .filter((tool) => tool);
+
+        if (openai.locals?.azureOptions && updateData.model) {
+            updateData.model = openai.locals.azureOptions.azureOpenAIApiDeploymentName;
         }
 
-        return req.app.locals.availableTools[tool];
-      })
-      .filter((tool) => tool);
+        const updatedAssistant = await openai.beta.assistants.update(assistant_id, updateData);
 
-    if (openai.locals?.azureOptions && updateData.model) {
-      updateData.model = openai.locals.azureOptions.azureOpenAIApiDeploymentName;
+        if (conversation_starters !== undefined) {
+            const conversationStartersUpdate = await updateAssistantDoc(
+                {assistant_id},
+                {conversation_starters},
+            );
+            updatedAssistant.conversation_starters = conversationStartersUpdate.conversation_starters;
+        }
+
+        if (append_current_datetime !== undefined) {
+            await updateAssistantDoc({assistant_id}, {append_current_datetime});
+            updatedAssistant.append_current_datetime = append_current_datetime;
+        }
+
+        res.json(updatedAssistant);
+    } catch (error) {
+        logger.error('[/assistants/:id] Error updating assistant', error);
+        res.status(500).json({error: error.message});
     }
-
-    const updatedAssistant = await openai.beta.assistants.update(assistant_id, updateData);
-
-    if (conversation_starters !== undefined) {
-      const conversationStartersUpdate = await updateAssistantDoc(
-        { assistant_id },
-        { conversation_starters },
-      );
-      updatedAssistant.conversation_starters = conversationStartersUpdate.conversation_starters;
-    }
-
-    if (append_current_datetime !== undefined) {
-      await updateAssistantDoc({ assistant_id }, { append_current_datetime });
-      updatedAssistant.append_current_datetime = append_current_datetime;
-    }
-
-    res.json(updatedAssistant);
-  } catch (error) {
-    logger.error('[/assistants/:id] Error updating assistant', error);
-    res.status(500).json({ error: error.message });
-  }
 };
 
 /**
@@ -167,20 +192,20 @@ const patchAssistant = async (req, res) => {
  * @returns {Assistant} 200 - success response - application/json
  */
 const deleteAssistant = async (req, res) => {
-  try {
-    const { openai } = await getOpenAIClient({ req, res });
-    await validateAuthor({ req, openai });
+    try {
+        const {openai} = await getOpenAIClient({req, res});
+        await validateAuthor({req, openai});
 
-    const assistant_id = req.params.id;
-    const deletionStatus = await openai.beta.assistants.del(assistant_id);
-    if (deletionStatus?.deleted) {
-      await deleteAssistantActions({ req, assistant_id });
+        const assistant_id = req.params.id;
+        const deletionStatus = await openai.beta.assistants.del(assistant_id);
+        if (deletionStatus?.deleted) {
+            await deleteAssistantActions({req, assistant_id});
+        }
+        res.json(deletionStatus);
+    } catch (error) {
+        logger.error('[/assistants/:id] Error deleting assistant', error);
+        res.status(500).json({error: 'Error deleting assistant'});
     }
-    res.json(deletionStatus);
-  } catch (error) {
-    logger.error('[/assistants/:id] Error deleting assistant', error);
-    res.status(500).json({ error: 'Error deleting assistant' });
-  }
 };
 
 /**
@@ -191,13 +216,13 @@ const deleteAssistant = async (req, res) => {
  * @returns {AssistantListResponse} 200 - success response - application/json
  */
 const listAssistants = async (req, res) => {
-  try {
-    const body = await fetchAssistants({ req, res });
-    res.json(body);
-  } catch (error) {
-    logger.error('[/assistants] Error listing assistants', error);
-    res.status(500).json({ message: 'Error listing assistants' });
-  }
+    try {
+        const body = await fetchAssistants({req, res});
+        res.json(body);
+    } catch (error) {
+        logger.error('[/assistants] Error listing assistants', error);
+        res.status(500).json({message: 'Error listing assistants'});
+    }
 };
 
 /**
@@ -209,21 +234,21 @@ const listAssistants = async (req, res) => {
  * @param {Partial<TAssistantEndpoint>} [params.assistantsConfig] -  The assistant configuration.
  * @returns {AssistantDocument[]} - The filtered list of assistants.
  */
-function filterAssistantDocs({ documents, userId, assistantsConfig = {} }) {
-  const { supportedIds, excludedIds, privateAssistants } = assistantsConfig;
-  const removeUserId = (doc) => {
-    const { user: _u, ...document } = doc;
-    return document;
-  };
+function filterAssistantDocs({documents, userId, assistantsConfig = {}}) {
+    const {supportedIds, excludedIds, privateAssistants} = assistantsConfig;
+    const removeUserId = (doc) => {
+        const {user: _u, ...document} = doc;
+        return document;
+    };
 
-  if (privateAssistants) {
-    return documents.filter((doc) => userId === doc.user.toString()).map(removeUserId);
-  } else if (supportedIds?.length) {
-    return documents.filter((doc) => supportedIds.includes(doc.assistant_id)).map(removeUserId);
-  } else if (excludedIds?.length) {
-    return documents.filter((doc) => !excludedIds.includes(doc.assistant_id)).map(removeUserId);
-  }
-  return documents.map(removeUserId);
+    if (privateAssistants) {
+        return documents.filter((doc) => userId === doc.user.toString()).map(removeUserId);
+    } else if (supportedIds?.length) {
+        return documents.filter((doc) => supportedIds.includes(doc.assistant_id)).map(removeUserId);
+    } else if (excludedIds?.length) {
+        return documents.filter((doc) => !excludedIds.includes(doc.assistant_id)).map(removeUserId);
+    }
+    return documents.map(removeUserId);
 }
 
 /**
@@ -232,31 +257,31 @@ function filterAssistantDocs({ documents, userId, assistantsConfig = {} }) {
  * @returns {AssistantDocument[]} 200 - success response - application/json
  */
 const getAssistantDocuments = async (req, res) => {
-  try {
-    const endpoint = req.query;
-    const assistantsConfig = req.app.locals[endpoint];
-    const documents = await getAssistants(
-      {},
-      {
-        user: 1,
-        assistant_id: 1,
-        conversation_starters: 1,
-        createdAt: 1,
-        updatedAt: 1,
-        append_current_datetime: 1,
-      },
-    );
+    try {
+        const endpoint = req.query;
+        const assistantsConfig = req.app.locals[endpoint];
+        const documents = await getAssistants(
+            {},
+            {
+                user: 1,
+                assistant_id: 1,
+                conversation_starters: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                append_current_datetime: 1,
+            },
+        );
 
-    const docs = filterAssistantDocs({
-      documents,
-      userId: req.user.id,
-      assistantsConfig,
-    });
-    res.json(docs);
-  } catch (error) {
-    logger.error('[/assistants/documents] Error listing assistant documents', error);
-    res.status(500).json({ error: error.message });
-  }
+        const docs = filterAssistantDocs({
+            documents,
+            userId: req.user.id,
+            assistantsConfig,
+        });
+        res.json(docs);
+    } catch (error) {
+        logger.error('[/assistants/documents] Error listing assistant documents', error);
+        res.status(500).json({error: error.message});
+    }
 };
 
 /**
@@ -270,88 +295,88 @@ const getAssistantDocuments = async (req, res) => {
  * @returns {Object} 200 - success response - application/json
  */
 const uploadAssistantAvatar = async (req, res) => {
-  try {
-    filterFile({ req, file: req.file, image: true, isAvatar: true });
-    const { assistant_id } = req.params;
-    if (!assistant_id) {
-      return res.status(400).json({ message: 'Assistant ID is required' });
-    }
-
-    const { openai } = await getOpenAIClient({ req, res });
-    await validateAuthor({ req, openai });
-
-    const buffer = await fs.readFile(req.file.path);
-    const image = await uploadImageBuffer({
-      req,
-      context: FileContext.avatar,
-      metadata: { buffer },
-    });
-
-    let _metadata;
-
     try {
-      const assistant = await openai.beta.assistants.retrieve(assistant_id);
-      if (assistant) {
-        _metadata = assistant.metadata;
-      }
+        filterFile({req, file: req.file, image: true, isAvatar: true});
+        const {assistant_id} = req.params;
+        if (!assistant_id) {
+            return res.status(400).json({message: 'Assistant ID is required'});
+        }
+
+        const {openai} = await getOpenAIClient({req, res});
+        await validateAuthor({req, openai});
+
+        const buffer = await fs.readFile(req.file.path);
+        const image = await uploadImageBuffer({
+            req,
+            context: FileContext.avatar,
+            metadata: {buffer},
+        });
+
+        let _metadata;
+
+        try {
+            const assistant = await openai.beta.assistants.retrieve(assistant_id);
+            if (assistant) {
+                _metadata = assistant.metadata;
+            }
+        } catch (error) {
+            logger.error('[/:assistant_id/avatar] Error fetching assistant', error);
+            _metadata = {};
+        }
+
+        if (_metadata.avatar && _metadata.avatar_source) {
+            const {deleteFile} = getStrategyFunctions(_metadata.avatar_source);
+            try {
+                await deleteFile(req, {filepath: _metadata.avatar});
+                await deleteFileByFilter({user: req.user.id, filepath: _metadata.avatar});
+            } catch (error) {
+                logger.error('[/:assistant_id/avatar] Error deleting old avatar', error);
+            }
+        }
+
+        const metadata = {
+            ..._metadata,
+            avatar: image.filepath,
+            avatar_source: req.app.locals.fileStrategy,
+        };
+
+        const promises = [];
+        promises.push(
+            updateAssistantDoc(
+                {assistant_id},
+                {
+                    avatar: {
+                        filepath: image.filepath,
+                        source: req.app.locals.fileStrategy,
+                    },
+                    user: req.user.id,
+                },
+            ),
+        );
+        promises.push(openai.beta.assistants.update(assistant_id, {metadata}));
+
+        const resolved = await Promise.all(promises);
+        res.status(201).json(resolved[1]);
     } catch (error) {
-      logger.error('[/:assistant_id/avatar] Error fetching assistant', error);
-      _metadata = {};
+        const message = 'An error occurred while updating the Assistant Avatar';
+        logger.error(message, error);
+        res.status(500).json({message});
+    } finally {
+        try {
+            await fs.unlink(req.file.path);
+            logger.debug('[/:agent_id/avatar] Temp. image upload file deleted');
+        } catch (error) {
+            logger.debug('[/:agent_id/avatar] Temp. image upload file already deleted');
+        }
     }
-
-    if (_metadata.avatar && _metadata.avatar_source) {
-      const { deleteFile } = getStrategyFunctions(_metadata.avatar_source);
-      try {
-        await deleteFile(req, { filepath: _metadata.avatar });
-        await deleteFileByFilter({ user: req.user.id, filepath: _metadata.avatar });
-      } catch (error) {
-        logger.error('[/:assistant_id/avatar] Error deleting old avatar', error);
-      }
-    }
-
-    const metadata = {
-      ..._metadata,
-      avatar: image.filepath,
-      avatar_source: req.app.locals.fileStrategy,
-    };
-
-    const promises = [];
-    promises.push(
-      updateAssistantDoc(
-        { assistant_id },
-        {
-          avatar: {
-            filepath: image.filepath,
-            source: req.app.locals.fileStrategy,
-          },
-          user: req.user.id,
-        },
-      ),
-    );
-    promises.push(openai.beta.assistants.update(assistant_id, { metadata }));
-
-    const resolved = await Promise.all(promises);
-    res.status(201).json(resolved[1]);
-  } catch (error) {
-    const message = 'An error occurred while updating the Assistant Avatar';
-    logger.error(message, error);
-    res.status(500).json({ message });
-  } finally {
-    try {
-      await fs.unlink(req.file.path);
-      logger.debug('[/:agent_id/avatar] Temp. image upload file deleted');
-    } catch (error) {
-      logger.debug('[/:agent_id/avatar] Temp. image upload file already deleted');
-    }
-  }
 };
 
 module.exports = {
-  createAssistant,
-  retrieveAssistant,
-  patchAssistant,
-  deleteAssistant,
-  listAssistants,
-  getAssistantDocuments,
-  uploadAssistantAvatar,
+    createAssistant,
+    retrieveAssistant,
+    patchAssistant,
+    deleteAssistant,
+    listAssistants,
+    getAssistantDocuments,
+    uploadAssistantAvatar,
 };
