@@ -156,7 +156,7 @@ export default function AssistantPanel({
       tools.push({ type: Tools.code_interpreter });
     }
     if (data.retrieval) {
-      tools.push({ type: version == 2 ? Tools.file_search : Tools.retrieval });
+      tools.push({ type: Tools.file_search });
     }
     if (data.image_vision) {
       tools.push(ImageVisionTool);
