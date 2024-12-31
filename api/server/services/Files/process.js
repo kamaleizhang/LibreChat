@@ -405,11 +405,7 @@ const processFileUpload = async ({ req, res, metadata }) => {
     openai,
   });
 
-  if (isAssistantUpload && !metadata.message_file && !metadata.tool_resource) {
-    await openai.beta.assistants.files.create(metadata.assistant_id, {
-      file_id: id,
-    });
-  } else if (isAssistantUpload && !metadata.message_file) {
+ if (isAssistantUpload && !metadata.message_file) {
     await addResourceFileId({
       req,
       openai,
@@ -437,7 +433,7 @@ const processFileUpload = async ({ req, res, metadata }) => {
       temp_file_id,
       bytes,
       filepath,
-      filename: filename ?? file.originalname,
+      filename: file.originalname??filename ,
       context: isAssistantUpload ? FileContext.assistants : FileContext.message_attachment,
       model: isAssistantUpload ? req.body.model : undefined,
       type: file.mimetype,

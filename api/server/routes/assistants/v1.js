@@ -1,5 +1,5 @@
 const express = require('express');
-const controllers = require('~/server/controllers/assistants/v1');
+const azure = require('~/server/controllers/assistants/azure');
 const documents = require('./documents');
 const actions = require('./actions');
 const tools = require('./tools');
@@ -33,7 +33,7 @@ router.use('/documents', documents);
  * @param {AssistantCreateParams} req.body - The assistant creation parameters.
  * @returns {Assistant} 201 - success response - application/json
  */
-router.post('/', controllers.createAssistant);
+router.post('/', azure.createAssistant);
 
 /**
  * Retrieves an assistant.
@@ -41,7 +41,7 @@ router.post('/', controllers.createAssistant);
  * @param {string} req.params.id - Assistant identifier.
  * @returns {Assistant} 200 - success response - application/json
  */
-router.get('/:id', controllers.retrieveAssistant);
+router.get('/:id', azure.retrieveAssistant);
 
 /**
  * Modifies an assistant.
@@ -50,7 +50,7 @@ router.get('/:id', controllers.retrieveAssistant);
  * @param {AssistantUpdateParams} req.body - The assistant update parameters.
  * @returns {Assistant} 200 - success response - application/json
  */
-router.patch('/:id', controllers.patchAssistant);
+router.patch('/:id', azure.patchAssistant);
 
 /**
  * Deletes an assistant.
@@ -58,7 +58,7 @@ router.patch('/:id', controllers.patchAssistant);
  * @param {string} req.params.id - Assistant identifier.
  * @returns {Assistant} 200 - success response - application/json
  */
-router.delete('/:id', controllers.deleteAssistant);
+router.delete('/:id', azure.deleteAssistant);
 
 /**
  * Returns a list of assistants.
@@ -66,7 +66,7 @@ router.delete('/:id', controllers.deleteAssistant);
  * @param {AssistantListParams} req.query - The assistant list parameters for pagination and sorting.
  * @returns {AssistantListResponse} 200 - success response - application/json
  */
-router.get('/', controllers.listAssistants);
+router.get('/', azure.listAssistants);
 
 /**
  * Uploads and updates an avatar for a specific assistant.
@@ -76,6 +76,6 @@ router.get('/', controllers.listAssistants);
  * @param {string} [req.body.metadata] - Optional metadata for the assistant's avatar.
  * @returns {Object} 200 - success response - application/json
  */
-avatar.post('/:assistant_id/avatar/', controllers.uploadAssistantAvatar);
+avatar.post('/:assistant_id/avatar/', azure.uploadAssistantAvatar);
 
 module.exports = { v1: router, avatar };

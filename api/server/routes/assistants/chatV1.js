@@ -10,7 +10,7 @@ const {
 } = require('~/server/middleware');
 const validateConvoAccess = require('~/server/middleware/validate/convoAccess');
 const validateAssistant = require('~/server/middleware/assistants/validate');
-const chatController = require('~/server/controllers/assistants/chatV1');
+const azureChat = require('~/server/controllers/assistants/azure_chat');
 
 router.post('/abort', handleAbort());
 
@@ -29,7 +29,7 @@ router.post(
   validateAssistant,
   validateConvoAccess,
   setHeaders,
-  chatController,
+  azureChat,
 );
 
 module.exports = router;
