@@ -247,41 +247,6 @@ const chatV1 = async (req, res) => {
       throw new Error('Missing assistant_id');
     }
 
-    const checkBalanceBeforeRun = async () => {
-      if (!isEnabled(process.env.CHECK_BALANCE)) {
-        return;
-      }
-      const transactions =
-        (await getTransactions({
-          user: req.user.id,
-          context: 'message',
-          conversationId,
-        })) ?? [];
-
-      const totalPreviousTokens = Math.abs(
-        transactions.reduce((acc, curr) => acc + curr.rawAmount, 0),
-      );
-
-      // TODO: make promptBuffer a config option; buffer for titles, needs buffer for system instructions
-      const promptBuffer = parentMessageId === Constants.NO_PARENT && !_thread_id ? 200 : 0;
-      // 5 is added for labels
-      let promptTokens = (await countTokens(text + (promptPrefix ?? ''))) + 5;
-      promptTokens += totalPreviousTokens + promptBuffer;
-      // Count tokens up to the current context window
-      promptTokens = Math.min(promptTokens, getModelMaxTokens(model));
-
-      await checkBalance({
-        req,
-        res,
-        txData: {
-          model,
-          user: req.user.id,
-          tokenType: 'prompt',
-          amount: promptTokens,
-        },
-      });
-    };
-
     const { openai: _openai, client } = await getOpenAIClient({
       req,
       res,
@@ -314,21 +279,7 @@ const chatV1 = async (req, res) => {
       clientTimestamp,
     });
 
-    const getRequestFileIds = async () => {
-      let thread_file_ids = [];
-      if (convoId) {
-        const convo = await getConvo(req.user.id, convoId);
-        if (convo && convo.file_ids) {
-          thread_file_ids = convo.file_ids;
-        }
-      }
 
-      file_ids = files.map(({ file_id }) => file_id);
-      if (file_ids.length || thread_file_ids.length) {
-        userMessage.file_ids = file_ids;
-        attachedFileIds = new Set([...file_ids, ...thread_file_ids]);
-      }
-    };
 
     const addVisionPrompt = async () => {
       if (!endpointOption.attachments) {
@@ -374,15 +325,27 @@ const chatV1 = async (req, res) => {
         });
 
       const pluralized = plural ? 's' : '';
-      body.additional_instructions = `${
-        body.additional_instructions ? `${body.additional_instructions}\n` : ''
-      }The user has uploaded ${imageCount} image${pluralized}.
-      Use the \`${ImageVisionTool.function.name}\` tool to retrieve ${
-  plural ? '' : 'a '
-}detailed text description${pluralized} for ${plural ? 'each' : 'the'} image${pluralized}.`;
+      body.additional_instructions = `${body.additional_instructions ? `${body.additional_instructions}\n` : ''}The user has uploaded ${imageCount} image${pluralized}.
+      Use the \`${ImageVisionTool.function.name}\` tool to retrieve ${plural ? '' : 'a '}detailed text description${pluralized} for ${plural ? 'each' : 'the'} image${pluralized}.`;
 
       return files;
     };
+
+	const getRequestFileIds = async () => {
+		  let thread_file_ids = [];
+		  if (convoId) {
+			  const convo = await getConvo(req.user.id, convoId);
+			  if (convo && convo.file_ids) {
+				  thread_file_ids = convo.file_ids;
+			  }
+		  }
+
+		  file_ids = files.map(({ file_id }) => file_id);
+		  if (file_ids.length || thread_file_ids.length) {
+			  userMessage.file_ids = file_ids; // !bad code!
+			  attachedFileIds = new Set([...file_ids, ...thread_file_ids]);
+		  }
+	  };
 
     /** @type {Promise<Run>|undefined} */
     let userMessagePromise;
@@ -391,7 +354,7 @@ const chatV1 = async (req, res) => {
       /** @type {[ undefined | MongoFile[]]}*/
       const [processedFiles] = await Promise.all([addVisionPrompt(), getRequestFileIds()]);
       // TODO: may allow multiple messages to be created beforehand in a future update
-      const initThreadBody = {
+      let initThreadBody = {
         messages: [userMessage],
         metadata: {
           user: req.user.id,
@@ -410,7 +373,7 @@ const chatV1 = async (req, res) => {
           }
         }
 
-        userMessage.file_ids = file_ids;
+        userMessage.file_ids = file_ids; // !bad code!
       }
 
       const result = await initThread({ openai, body: initThreadBody, thread_id });
@@ -459,6 +422,41 @@ const chatV1 = async (req, res) => {
       }
     };
 
+	const checkBalanceBeforeRun = async () => {
+		  if (!isEnabled(process.env.CHECK_BALANCE)) {
+			  return;
+		  }
+		  const transactions =
+			  (await getTransactions({
+				  user: req.user.id,
+				  context: 'message',
+				  conversationId,
+			  })) ?? [];
+
+		  const totalPreviousTokens = Math.abs(
+			  transactions.reduce((acc, curr) => acc + curr.rawAmount, 0),
+		  );
+
+		  // TODO: make promptBuffer a config option; buffer for titles, needs buffer for system instructions
+		  const promptBuffer = parentMessageId === Constants.NO_PARENT && !_thread_id ? 200 : 0;
+		  // 5 is added for labels
+		  let promptTokens = (await countTokens(text + (promptPrefix ?? ''))) + 5;
+		  promptTokens += totalPreviousTokens + promptBuffer;
+		  // Count tokens up to the current context window
+		  promptTokens = Math.min(promptTokens, getModelMaxTokens(model));
+
+		  await checkBalance({
+			  req,
+			  res,
+			  txData: {
+				  model,
+				  user: req.user.id,
+				  tokenType: 'prompt',
+				  amount: promptTokens,
+			  },
+		  });
+	  };
+
     const promises = [initializeThread(), checkBalanceBeforeRun()];
     await Promise.all(promises);
 
@@ -502,11 +500,10 @@ const chatV1 = async (req, res) => {
          * By default, a Run will use the model and tools configuration specified in Assistant object,
          * but you can override most of these when creating the Run for added flexibility:
          */
-        const run = await createRun({
-          openai,
-          thread_id,
-          body,
-        });
+        //https://platform.openai.com/docs/api-reference/runs/createRun
+        body.tool_choice = "auto"
+        const run = await openai.beta.threads.runs.create(thread_id, body);
+
 
         run_id = run.id;
         await cache.set(cacheKey, `${thread_id}:${run_id}`, Time.TEN_MINUTES);
