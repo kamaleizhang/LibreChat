@@ -12,6 +12,9 @@ const {countTokens, escapeRegExp} = require('~/server/utils');
 const {spendTokens} = require('~/models/spendTokens');
 const {saveConvo} = require('~/models/Conversation');
 
+const fileSearchSupportedTypes = ['.c', '.cpp', '.cs', '.css', '.doc', '.docx', '.go', '.html', '.java', '.js', '.json', '.md', '.pdf', '.php', '.pptx', '.py', '.rb', '.sh', '.tex', '.ts', '.txt'];
+const codeInterpreterSupportedTypes = ['.c', '.cs', '.cpp', '.csv', '.doc', '.docx', '.html', '.java', '.json', '.md', '.pdf', '.php', '.pptx', '.py', '.rb', '.tex', '.txt', '.css', '.js', '.sh', '.ts', '.csv', '.jpeg', '.jpg', '.gif', '.pkl', '.png', '.tar', '.xlsx', '.xml', '.zip'];
+
 /**
  * Initializes a new thread or adds messages to an existing thread.
  *
@@ -26,21 +29,32 @@ const {saveConvo} = require('~/models/Conversation');
 async function initThread({openai, body, thread_id: _thread_id}) {
     let thread = {};
     const messages = [];
-    //todo 根据文件类型决定attach到什么tool
-    //cvs,excel attach 到 code_interpreter
-    //pdf attach 到 file_search
+    //根据文件类型决定attach到什么tool
     if (_thread_id) {
         let message = body.messages[0]
         let fileIds = message.file_ids ||[]
         delete message.file_ids
-        //create a message with file
+        // create a message with file
         // https://platform.openai.com/docs/api-reference/messages/createMessage
-        message.attachments = fileIds.map(file_id => {
-            return {
-                "file_id": file_id,
-                tools: [{"type": "code_interpreter"}, {"type": "file_search"}]
+        // 根据文件类型创建附件
+        message.attachments = await Promise.all(fileIds.map(async (file_id) => {
+            const fileInfo = await openai.files.retrieve(file_id); // 获取文件信息
+            const fileExtension = `.${fileInfo.filename.split('.').pop().toLowerCase()}`;
+
+            // 判断文件类型并决定附加到哪个工具
+            const tools = [];
+            if (fileSearchSupportedTypes.includes(fileExtension)) {
+                tools.push({ type: 'file_search' });
             }
-        });
+            if (codeInterpreterSupportedTypes.includes(fileExtension)) {
+                tools.push({ type: 'code_interpreter' });
+            }
+            return {
+                file_id: file_id,
+                tools: tools
+            };
+        }));
+
 
         message = await openai.beta.threads.messages.create(_thread_id, message);
         messages.push(message);
@@ -48,10 +62,27 @@ async function initThread({openai, body, thread_id: _thread_id}) {
         let message = body.messages[0]
         let fileIds = message.file_ids;
         delete message.file_ids
+        // 根据文件类型分组
+        const codeInterpreterFiles = [];
+        const fileSearchFiles = [];
+
+        await Promise.all(fileIds.map(async (file_id) => {
+            const fileInfo = await openai.files.retrieve(file_id); // 获取文件信息
+            const fileExtension = `.${fileInfo.filename.split('.').pop().toLowerCase()}`;
+
+            if (codeInterpreterSupportedTypes.includes(fileExtension)) {
+                codeInterpreterFiles.push(file_id);
+            }
+            if (fileSearchSupportedTypes.includes(fileExtension)) {
+                fileSearchFiles.push(file_id);
+            }
+        }));
+
+        // 设置工具资源
         body.tool_resources = {
-            "code_interpreter": {"file_ids": fileIds},
-            "file_search": {"vector_stores": [{"file_ids": fileIds}]}
-        }
+            code_interpreter: { file_ids: codeInterpreterFiles },
+            file_search: { vector_stores: [{ file_ids: fileSearchFiles }] }
+        };
         // create a new thread with file
         // https://platform.openai.com/docs/api-reference/threads/createThread
         thread = await openai.beta.threads.create(body);
